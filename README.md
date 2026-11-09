@@ -9,6 +9,29 @@
 - 应用前自动备份原始配置；「还原」按备份逐键写回，**原本没显式设置的键会 `gsettings reset`**，
   真正回到动手之前的状态（已实测，见文末验证记录）。
 
+## 适用范围（先读这个）
+
+- **系统**：Linux + GNOME。本机验证环境为 **Ubuntu 24.04 + GNOME 46**（笔记本 Y9000P 2022，
+  内屏 + 外接 AOC 4K），Python 3.12、`glib 2.80` 自带的 `gsettings` / `dconf`。
+- **X11 与 Wayland 都能用**：本服务只改 gsettings / dconf 里的配色与字体键，以及 Trae 的
+  `settings.json`，**不碰显示输出、分辨率、缩放、亮度**，所以不像 `screen`（8765）那样只在 X11 下可用。
+- **需要**：`python3` ≥ 3.10、`gsettings`、`dconf`；`gnome-terminal`（终端配色）、`gedit`（可选）、
+  Trae CN（可选）。缺哪个就跳过对应部分并在报告里说明，不影响其他项。
+- **权限**：**完全用户态，不需要 root / sudo，也不需要 polkit 规则**。写入范围只有当前用户的
+  dconf 数据库与 `~/.config/Trae CN/User/settings.json`。
+- **会改哪些配置**（细节见「覆盖范围」表）：GNOME Terminal 的默认 profile（16 色盘、前景背景、
+  加粗/光标/选区、字体字号、行高）；`org.gnome.desktop.interface` 的 `gtk-theme`、`color-scheme`、
+  `font-name`、`monospace-font-name`；`org.gnome.gedit.preferences.editor` 的 `scheme`、`editor-font`；
+  Trae 的 `workbench.colorTheme`、`editor.fontFamily`、`editor.fontSize`、`editor.lineHeight`。
+- **不会改**：显示器分辨率 / 缩放 / 亮度 / 色温（属于 `screen` 服务）、窗口管理器键
+  （`org.gnome.desktop.wm.preferences`）、shell 的 `.bashrc` / `.zshrc` / `.profile`、
+  `screen` 的状态文件、LibreOffice 的 `registrymodifications.xcu`。
+- **怎么还原**：界面上「还原本机原始配置」（按最早那份备份逐键写回，原本没设置的键执行
+  `gsettings reset`），或 `python3 backend/theme_server.py --restore`。备份在
+  `~/.local/share/theme-manager-backup/<时间戳>/`，还原不会删备份，也不会还原后再改回去。
+- **其他发行版 / 桌面**：非 GNOME 环境（KDE、XFCE 等）下 GTK 主题名与 `color-scheme` 键可能不存在，
+  对应项会失败并写进报告；`gsettings` 可用即可运行，但未验证。
+
 ## 快速开始
 
 ```bash
