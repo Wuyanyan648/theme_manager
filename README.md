@@ -58,7 +58,7 @@ python3 backend/theme_server.py --restore             # 还原到最早的一份
 
 ## 界面
 
-- **预设卡片**：6 个方案，卡片上直接给 16 色盘的色块与前景/背景示例字。
+- **预设卡片**：12 个方案（10 深色 / 2 浅色），卡片上直接给 16 色盘的色块与前景/背景示例字。
 - **微调**：背景色、前景色、等宽字号、界面字号、终端行高；「微调归零」回到预设原值。
 - **应用**：逐项写入后**立即回读校验**，清单里只有写进去且读回一致的才打 ✓，不一致打 ✗ 并写原因。
   部分能力缺失（例如 Trae 没有对应主题、GTK 主题没装）会在「备注」里说明，不会假装成功。
@@ -70,6 +70,16 @@ python3 backend/theme_server.py --restore             # 还原到最早的一份
 
 每个预设同时定义：终端 16 色 + 前景/背景/加粗（强调）色、GTK 主题取向、编辑器主题、gedit 配色方案。
 下面是**本机实测解析出的值**（候选列表里第一个真实存在的）。
+
+深色方案按取向刻意拉开差距，避免一批同类：
+
+| 取向 | 预设 | 特点 |
+| --- | --- | --- |
+| 低饱和暖调（护眼向） | `everforest-dark`（新增） | 暖绿 + 米色前景，亮色全部压暗，夜间不抢眼 |
+| 冷调 | `nord`、`tokyo-night`（新增）、`kanagawa`（新增） | 蓝灰 → 深靛蓝 → 墨青，亮度依次更暗 |
+| 中性灰 | `graphite`、`one-dark`、`catppuccin-mocha`（新增） | 石墨灰 / 蓝灰 / 灰紫粉彩，不带强烈偏色 |
+| 高对比 | `dracula`（新增） | 前景偏白、亮色鲜亮，约 13:1，适合光线充足时 |
+| 极低对比、偏暗不刺眼 | `zenburn`（新增） | 暗橄榄灰底、无纯黑纯白，约 6.8:1，亮色再压一档 |
 
 ### 1. 暖灰浅色 `warm-gray`
 
@@ -106,6 +116,43 @@ python3 backend/theme_server.py --restore             # 还原到最早的一份
 - 前景 `#657B83` / 背景 `#FDF6E3` / 强调 `#268BD2`
 - 16 色：`#073642 #DC322F #859900 #B58900 #268BD2 #D33682 #2AA198 #EEE8D5 #002B36 #CB4B16 #586E75 #657B83 #839496 #6C71C4 #93A1A1 #FDF6E3`
 - GTK：`Yaru-sage` · `default` · gedit `solarized-light` · Trae `Solarized (light)`
+
+### 7. Everforest 深色 `everforest-dark`（新增 · 低饱和暖调）
+
+- 前景 `#D3C6AA` / 背景 `#2F383E` / 强调 `#A7C080`，行高 1.12
+- 16 色：`#2F383E #E67E80 #A7C080 #DBBC7F #7FBBB3 #D699B6 #83C092 #D3C6AA #7A8478 #E67E80 #A7C080 #DBBC7F #7FBBB3 #D699B6 #83C092 #F2EFDF`
+- GTK：`Yaru-olive-dark` · `prefer-dark` · gedit `oblivion` · Trae `Monokai Dimmed`（**近似**）
+
+### 8. Kanagawa 墨色 `kanagawa`（新增 · 冷调墨青）
+
+- 前景 `#DCD7BA` / 背景 `#1F1F28` / 强调 `#7E9CD8`，行高 1.12
+- 16 色：`#16161D #C34043 #76946A #C0A36E #7E9CD8 #957FB8 #6A9589 #C8C093 #727169 #E82424 #98BB6C #E6C384 #7FB4CA #938AA9 #7AA89F #DCD7BA`
+- GTK：`Yaru-prussiangreen-dark` · `prefer-dark` · gedit `solarized-dark` · Trae `Tomorrow Night Blue`（**近似**）
+
+### 9. Tokyo Night `tokyo-night`（新增 · 冷调深靛蓝）
+
+- 前景 `#A9B1D6` / 背景 `#1A1B26` / 强调 `#7AA2F7`，行高 1.12
+- 16 色：`#15161E #F7768E #9ECE6A #E0AF68 #7AA2F7 #BB9AF7 #7DCFFF #A9B1D6 #414868 #F7768E #9ECE6A #E0AF68 #7AA2F7 #BB9AF7 #7DCFFF #C0CAF5`
+- GTK：`Yaru-purple-dark` · `prefer-dark` · gedit `oblivion` · Trae `Default Dark Modern`（**近似**）
+
+### 10. Catppuccin Mocha `catppuccin-mocha`（新增 · 中性灰紫粉彩）
+
+- 前景 `#CDD6F4` / 背景 `#1E1E2E` / 强调 `#89B4FA`，行高 1.12
+- 16 色：`#313244 #F38BA8 #A6E3A1 #F9E2AF #89B4FA #F5C2E7 #94E2D5 #BAC2DE #585B70 #F38BA8 #A6E3A1 #F9E2AF #89B4FA #F5C2E7 #94E2D5 #CDD6F4`
+- GTK：`Yaru-magenta-dark` · `prefer-dark` · gedit `Adwaita-dark` · Trae `Monokai Dimmed`（**近似**）
+
+### 11. Dracula `dracula`（新增 · 高对比）
+
+- 前景 `#F8F8F2` / 背景 `#282A36` / 强调 `#BD93F9`，行高 1.12
+- 16 色：`#21222C #FF5555 #50FA7B #F1FA8C #BD93F9 #FF79C6 #8BE9FD #F8F8F2 #6272A4 #FF6E6E #69FF94 #FFFFA5 #D6ACFF #FF92DF #A4FFFF #F8F8F2`
+- GTK：`Yaru-purple-dark` · `prefer-dark` · gedit `oblivion` · Trae `Monokai`（**近似**）
+
+### 12. Zenburn `zenburn`（新增 · 极低对比、偏暗）
+
+- 前景 `#DCDCCC` / 背景 `#3F3F3F` / 强调 `#F0DFAF`，行高 1.12
+- 16 色：`#3F3F3F #CC9393 #7F9F7F #F0DFAF #7CB8BB #DC8CC3 #93E0E3 #DCDCCC #709080 #DCA3A3 #BFEBBF #E0CF9F #94BFF3 #EC93D3 #93E0E3 #E8E8D8`
+- GTK：`Yaru-sage-dark` · `prefer-dark` · gedit `oblivion` · Trae `Solarized (dark)`（**近似**）
+- 亮色项没有用纯白，前景也压到 `#DCDCCC`，是这批里对比最低的一档；要更暗就只调背景色，不要把前景调亮。
 
 > 微调只允许改背景色、前景色、等宽字号、界面字号、行高；其他色（16 色盘、加粗/光标/选区）始终跟预设走，
 > 避免调出一套「自己都看不清」的组合。选区底色由强调色按 28% 叠在背景上算出来。
