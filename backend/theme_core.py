@@ -184,7 +184,7 @@ PRESETS = [
     {
         "id": "solarized-light",
         "name": "Solarized 浅沙",
-        "desc": "经典低对比浅沙底，护眼但需要环境光别太强。",
+        "desc": "经典低对比浅沙底，环境光偏强时容易发灰。",
         "mode": "light",
         "fg": "#657B83",
         "bg": "#FDF6E3",
