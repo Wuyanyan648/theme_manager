@@ -699,26 +699,29 @@ def _apply_spec(spec, value):
         raise CommandError("文件型配置不走这里")
 
 
+def find_backup_by_hash(state_hash):
+    """按状态哈希找已有备份（从新到旧）：来回切同一套配色时不重复堆目录。"""
+    for b in reversed(list_backups()):
+        try:
+            with open(os.path.join(b["dir"], "manifest.json"), encoding="utf-8") as f:
+                if json.load(f).get("state_hash") == state_hash:
+                    return b
+        except (OSError, ValueError):
+            continue
+    return None
+
+
 def apply_theme(preset_id, overrides=None, skip_backup=False):
     want = resolve_preset(preset_id, overrides)
     snapshot = collect_state()
     backup = {"dir": "", "created": False, "reused": False, "reason": ""}
 
     if not skip_backup:
-        existing = list_backups()
-        last_hash = existing[-1]["name"] if existing else ""
-        same = False
-        if last_hash:
-            try:
-                with open(os.path.join(BACKUP_ROOT, last_hash, "manifest.json"),
-                          encoding="utf-8") as f:
-                    same = json.load(f).get("state_hash") == _state_hash(snapshot)
-            except (OSError, ValueError):
-                same = False
-        if same:
-            backup.update({"dir": os.path.join(BACKUP_ROOT, last_hash), "reused": True,
-                           "reason": "当前配置与上一次备份一致，复用该备份"
-                                     "（保证最早备份仍是原始状态）"})
+        hit = find_backup_by_hash(_state_hash(snapshot))
+        if hit:
+            backup.update({"dir": hit["dir"], "reused": True,
+                           "reason": "当前配置与备份 %s 完全一致，直接复用它（不重复占空间）"
+                                     % hit["name"]})
         else:
             d, _ = create_backup("apply:%s" % want["id"], want["id"], snapshot)
             backup.update({"dir": d, "created": True})
@@ -727,7 +730,6 @@ def apply_theme(preset_id, overrides=None, skip_backup=False):
     ui_family = pick_family("prop", UI_FONT_FAMILY)
     uuid = terminal_profile_uuid()
     tpath = terminal_path(uuid)
-    tprof = "%s:%s/" % (TERMINAL_BASE_PATH, uuid)
     items = []
     notes = []
 

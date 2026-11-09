@@ -109,7 +109,8 @@ python3 backend/theme_server.py --restore             # 还原到最早的一份
 - 根目录：`~/.local/share/theme-manager-backup/<YYYYmmdd_HHMMSS>/`
 - 每次「应用」前抓一份快照，内容：
   - `manifest.json`：每个键的**原始 GVariant 值**（空串表示原本没显式设置）、终端 profile UUID、
-    Trae settings.json 的关键键值、状态哈希（用于判断「和上次备份一致」就复用，不重复堆目录）；
+    Trae settings.json 的关键键值、状态哈希（和已有备份状态一致时直接复用那份，来回切同一套配色
+    不会堆出一串重复目录）；
   - `dconf/{terminal,interface,gedit}.ini`：`dconf dump` 出来的可读副本，方便人工核对；
   - `files/trae-settings.json`：编辑器配置的整份拷贝（还原时整份覆盖，最精确）。
 - 还原逻辑：终端 / 桌面 / gedit 只回写**本服务管的那几项**（不整目录 `dconf load`，避免把后来改的
