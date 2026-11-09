@@ -1,0 +1,16 @@
+[Unit]
+Description=theme_manager 统一配色与字体管理（127.0.0.1:8790）
+Documentation=file://@DIR@/README.md
+
+[Service]
+Type=simple
+WorkingDirectory=@DIR@
+Environment=PORT=8790
+ExecStart=/usr/bin/python3 @DIR@/backend/theme_server.py --no-browser
+Restart=on-failure
+RestartSec=2
+# 端口已被占用时 theme_server 返回 3：属于「已有实例」，不算失败
+SuccessExitStatus=3
+
+[Install]
+WantedBy=default.target

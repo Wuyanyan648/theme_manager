@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>统一配色与字体 · 127.0.0.1:8790</title>
+<style>
+  :root{
+    --bg:#14171c; --panel:#1b1f26; --panel2:#212630; --line:#2b313c;
+    --fg:#d5dbe3; --dim:#8b95a3; --accent:#7fa8cc; --ok:#63b37a; --bad:#d9636a;
+    --mono: ui-monospace, "Ubuntu Sans Mono", "Noto Sans Mono", monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);
+       font:14px/1.55 system-ui,"Ubuntu Sans","Noto Sans SC",sans-serif;}
+  header{padding:22px 26px 12px;border-bottom:1px solid var(--line);display:flex;
+         align-items:baseline;gap:14px;flex-wrap:wrap}
+  header h1{font-size:17px;margin:0;font-weight:600;letter-spacing:.5px}
+  header .sub{color:var(--dim);font-size:12.5px}
+  header .spacer{flex:1}
+  .badge{font-size:12px;color:var(--dim);border:1px solid var(--line);border-radius:20px;
+         padding:3px 10px}
+  main{max-width:1180px;margin:0 auto;padding:20px 26px 60px}
+  section{margin-bottom:26px}
+  h2{font-size:14px;margin:0 0 12px;font-weight:600;color:var(--fg);letter-spacing:.3px;
+     display:flex;align-items:center;gap:10px}
+  h2 .hint{font-weight:400;color:var(--dim);font-size:12px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:12px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:13px 14px;
+        cursor:pointer;transition:border-color .15s,transform .15s;position:relative}
+  .card:hover{border-color:#3b4553;transform:translateY(-1px)}
+  .card.sel{border-color:var(--accent);box-shadow:0 0 0 1px rgba(127,168,204,.35) inset}
+  .card .top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .card .nm{font-weight:600;font-size:14px}
+  .card .mode{font-size:11px;color:var(--dim);border:1px solid var(--line);border-radius:6px;
+              padding:1px 6px}
+  .card .ds{color:var(--dim);font-size:12px;margin:5px 0 10px;min-height:34px}
+  .sw{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;margin-bottom:8px}
+  .sw i{height:15px;border-radius:3px;display:block;border:1px solid rgba(255,255,255,.06)}
+  .sample{border-radius:6px;padding:7px 9px;font-family:var(--mono);font-size:12px;
+          display:flex;justify-content:space-between;align-items:center}
+  .sample .tag{font-family:system-ui,sans-serif;font-size:10.5px;opacity:.65}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+  .row{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-end}
+  .fld{display:flex;flex-direction:column;gap:5px}
+  .fld label{font-size:12px;color:var(--dim)}
+  input[type=color]{width:56px;height:32px;padding:0;border:1px solid var(--line);
+                    background:var(--panel2);border-radius:6px;cursor:pointer}
+  input[type=number]{width:78px;background:var(--panel2);border:1px solid var(--line);
+                     color:var(--fg);border-radius:6px;padding:6px 8px;font-family:var(--mono)}
+  input[type=range]{width:150px;accent-color:var(--accent)}
+  button{background:var(--panel2);color:var(--fg);border:1px solid var(--line);border-radius:7px;
+         padding:8px 14px;font-size:13px;cursor:pointer;font-family:inherit}
+  button:hover{border-color:#3f4a59}
+  button.primary{background:#2c4a63;border-color:#3c6285;color:#e8f1f8}
+  button.primary:hover{background:#33546f}
+  button.ghost{background:transparent}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  .btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+  .kv .item{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+  .kv .k{font-size:11.5px;color:var(--dim);margin-bottom:3px}
+  .kv .v{font-family:var(--mono);font-size:12.5px;word-break:break-all}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--dim);font-weight:500;font-size:11.5px}
+  td.mono{font-family:var(--mono)}
+  .ok{color:var(--ok)} .bad{color:var(--bad)}
+  .notes{margin:10px 0 0;padding-left:18px;color:#c9b27a;font-size:12.5px}
+  .notes li{margin:3px 0}
+  .warn{background:#2a2318;border:1px solid #4a3d20;color:#d8c48a;border-radius:8px;
+        padding:10px 12px;font-size:12.5px;margin-bottom:12px}
+  #toast{position:fixed;right:20px;bottom:20px;background:#232a34;border:1px solid #3a4351;
+         border-radius:8px;padding:10px 14px;font-size:13px;opacity:0;transform:translateY(8px);
+         transition:.2s;pointer-events:none;max-width:420px}
+  #toast.show{opacity:1;transform:none}
+  details{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 16px}
+  summary{cursor:pointer;color:var(--dim);font-size:12.5px}
+  details p{color:var(--dim);font-size:12.5px}
+  code{font-family:var(--mono);font-size:12px;background:#232a34;padding:1px 5px;border-radius:4px}
+  .empty{color:var(--dim);font-size:12.5px;padding:8px 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>统一配色与字体</h1>
+  <span class="sub">GNOME Terminal · 桌面 GTK / 字体 · gedit · Trae</span>
+  <span class="spacer"></span>
+  <span class="badge" id="curBadge">读取中…</span>
+</header>
+
+<main>
+  <div id="driftBox"></div>
+
+  <section>
+    <h2>预设 <span class="hint">点一张卡片选中，再按「应用」；应用前会自动备份原始配置</span></h2>
+    <div class="grid" id="presets"></div>
+  </section>
+
+  <section>
+    <h2>微调 <span class="hint">只允许改背景色、前景色、字号、行高；其余跟着预设走</span></h2>
+    <div class="panel">
+      <div class="row">
+        <div class="fld"><label>背景色</label><input type="color" id="ovBg"></div>
+        <div class="fld"><label>前景色</label><input type="color" id="ovFg"></div>
+        <div class="fld"><label>等宽字号 <span id="monoVal">12</span>pt</label>
+          <input type="range" id="ovMono" min="9" max="20" step="1"></div>
+        <div class="fld"><label>界面字号 <span id="uiVal">11</span>pt</label>
+          <input type="range" id="ovUi" min="9" max="16" step="1"></div>
+        <div class="fld"><label>终端行高 <span id="lhVal">1.12</span></label>
+          <input type="range" id="ovLh" min="1.0" max="1.4" step="0.02"></div>
+        <div class="fld"><label>&nbsp;</label>
+          <button class="ghost" id="resetTweak">微调归零</button></div>
+      </div>
+      <div class="btnrow">
+        <button class="primary" id="applyBtn">应用这个预设</button>
+        <button id="restoreBtn">还原本机原始配置</button>
+      </div>
+      <ul class="notes" id="notes"></ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>生效清单 <span class="hint">每一条都是写入后回读校验的结果，读回不一致就标 ✗</span></h2>
+    <div class="panel" id="report"><div class="empty">还没有应用过。</div></div>
+  </section>
+
+  <section>
+    <h2>当前实际值</h2>
+    <div class="kv" id="current"></div>
+  </section>
+
+  <section>
+    <h2>备份 <span class="hint">最早的一条就是本服务动手前的原始状态</span></h2>
+    <div class="panel" id="backups"><div class="empty">还没有备份。</div></div>
+  </section>
+
+  <section>
+    <details>
+      <summary>覆盖范围与做不到的地方（点开）</summary>
+      <p><b>会改：</b>GNOME Terminal 的 16 色盘 / 前景背景 / 光标 / 选区 / 字体字号 / 行高（<code>cell-height-scale</code>）；
+      GNOME 桌面 <code>gtk-theme</code>、<code>color-scheme</code>、<code>font-name</code>、<code>monospace-font-name</code>；
+      gedit 的 GtkSourceView 配色方案与编辑器字体；Trae 的 <code>workbench.colorTheme</code>、
+      <code>editor.fontFamily</code>、<code>editor.fontSize</code>、<code>editor.lineHeight</code>。</p>
+      <p><b>不会改：</b>显示器分辨率 / 缩放 / 亮度 / 色温（属于 8765）、窗口管理器键（<code>org.gnome.desktop.wm.preferences</code>）、
+      shell 的 <code>.bashrc</code> / <code>.zshrc</code>、任何 <code>screen</code> 服务的状态文件。</p>
+      <p><b>只有部分生效：</b>Gruvbox / Nord / One Dark 在 Trae 里没有官方对应主题，编辑器会映射到最接近的内置主题
+      （Kimbie Dark / Default Dark Modern 等），语法高亮颜色与终端色盘不完全一致；GTK 主题只能用本机已安装的
+      Yaru / Adwaita 系列，不会为每个预设生成一套 GTK 主题；LibreOffice 不吃 GTK 配色，界面字体跟随系统字体，
+      文档颜色需要它自己的「应用程序颜色」设置，本服务不碰它的 <code>registrymodifications.xcu</code>。
+      Electron 系应用（含 Trae）改完主题一般会自己重载，个别窗口需要 <code>Reload Window</code> 或重启才完全跟上。</p>
+    </details>
+  </section>
+</main>
+<div id="toast"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+let S = null;            // /api/state
+let sel = null;          // 选中的预设 id
+let tweaked = false;
+
+function toast(msg, bad){
+  const t = $('#toast');
+  t.textContent = msg;
+  t.style.borderColor = bad ? '#6a3438' : '#3a4351';
+  t.classList.add('show');
+  clearTimeout(t._h);
+  t._h = setTimeout(()=>t.classList.remove('show'), 4200);
+}
+
+async function getState(){
+  const r = await fetch('/api/state', {cache:'no-store'});
+  return r.json();
+}
+
+async function post(path, body){
+  const r = await fetch(path, {method:'POST', headers:{'Content-Type':'application/json'},
+                               body: JSON.stringify(body||{})});
+  return r.json();
+}
+
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function renderPresets(){
+  const cur = S.state.preset;
+  const box = $('#presets');
+  box.innerHTML = '';
+  S.presets.forEach(p=>{
+    const el = document.createElement('div');
+    el.className = 'card' + ((sel===p.id)?' sel':'');
+    const sw = p.palette.map(c=>`<i style="background:${c}" title="${c}"></i>`).join('');
+    el.innerHTML = `
+      <div class="top"><span class="nm">${esc(p.name)}</span>
+        <span class="mode">${p.mode==='dark'?'深色':'浅色'}${cur===p.id?' · 已应用':''}</span></div>
+      <div class="ds">${esc(p.desc)}</div>
+      <div class="sw">${sw}</div>
+      <div class="sample" style="background:${p.bg};color:${p.fg}">
+        <span>Aa 中文 0123</span><span class="tag">${p.bg.toUpperCase()} · ${p.fg.toUpperCase()}</span></div>`;
+    el.onclick = ()=>{ sel = p.id; tweaked = false; syncTweakInputs(); renderPresets(); };
+    box.appendChild(el);
+  });
+}
+
+function syncTweakInputs(){
+  const p = S.presets.find(x=>x.id===sel) || S.presets[0];
+  $('#ovBg').value = p.bg.toLowerCase();
+  $('#ovFg').value = p.fg.toLowerCase();
+  $('#ovMono').value = p.mono_size;
+  $('#ovUi').value = p.ui_size;
+  $('#ovLh').value = p.cell_height;
+  $('#monoVal').textContent = p.mono_size;
+  $('#uiVal').textContent = p.ui_size;
+  $('#lhVal').textContent = Number(p.cell_height).toFixed(2);
+  tweaked = false;
+}
+
+function collectOverrides(){
+  const p = S.presets.find(x=>x.id===sel) || S.presets[0];
+  const ov = {};
+  const bg = $('#ovBg').value.toLowerCase(), fg = $('#ovFg').value.toLowerCase();
+  if (bg !== p.bg.toLowerCase()) ov.bg = bg;
+  if (fg !== p.fg.toLowerCase()) ov.fg = fg;
+  const mono = Number($('#ovMono').value), ui = Number($('#ovUi').value);
+  const lh = Number($('#ovLh').value);
+  if (mono !== p.mono_size) ov.mono_size = mono;
+  if (ui !== p.ui_size) ov.ui_size = ui;
+  if (Math.abs(lh - p.cell_height) > 1e-6) ov.cell_height = lh;
+  return ov;
+}
+
+function renderCurrent(){
+  const c = S.current, caps = S.capabilities;
+  const items = [
+    ['终端 背景 / 前景', `${c.terminal.bg||'—'} / ${c.terminal.fg||'—'}`],
+    ['终端 字体', c.terminal.font||'—'],
+    ['终端 行高', c.terminal.cell_height||'—'],
+    ['终端 跟随 GTK 主题', c.terminal.use_theme_colors||'—'],
+    ['桌面 GTK 主题', c.desktop.gtk_theme||'—'],
+    ['桌面 深/浅色偏好', c.desktop.color_scheme||'—'],
+    ['桌面 界面字体', c.desktop.font||'—'],
+    ['桌面 等宽字体', c.desktop.mono_font||'—'],
+    ['gedit 配色 / 字体', `${c.gedit.scheme||'—'} / ${c.gedit.font||'—'}`],
+    ['Trae 主题', c.editor.theme||'—'],
+    ['Trae 字体', `${c.editor.font_family||'—'} · ${c.editor.font_size||'—'}pt / 行高 ${c.editor.line_height||'—'}`],
+    ['备份目录', caps.backup_root],
+  ];
+  $('#current').innerHTML = items.map(([k,v])=>
+    `<div class="item"><div class="k">${esc(k)}</div><div class="v">${esc(v)}</div></div>`).join('');
+}
+
+function renderReport(res, restore){
+  if(!res){ $('#report').innerHTML = '<div class="empty">还没有应用过。</div>'; return; }
+  if(res.error){
+    $('#report').innerHTML = `<div class="warn">${esc(res.error)}</div>`; return;
+  }
+  const head = restore
+    ? `按备份 <code>${esc(res.restored_from)}</code> 还原 · ${esc(res.at_text)} · 回读一致 ${res.ok_count}/${res.total}`
+    : `预设 ${esc((res.preset||{}).name||'')} · ${esc(res.at_text)} · 回读一致 ${res.ok_count}/${res.total}`;
+  const rows = (res.items||[]).map(it=>`
+    <tr><td class="${it.ok?'ok':'bad'}">${it.ok?'✓':'✗'}</td>
+      <td>${esc(it.app)}</td><td>${esc(it.item)}</td>
+      <td class="mono">${esc(it.value)}</td><td>${esc(it.note||'')}</td></tr>`).join('');
+  $('#report').innerHTML = `${head}
+    <table><thead><tr><th></th><th>应用</th><th>项</th><th>写入值</th><th>备注</th></tr></thead>
+    <tbody>${rows}</tbody></table>`;
+}
+
+function renderNotes(res){
+  const ul = $('#notes');
+  const notes = (res && res.notes) || [];
+  if(!notes.length){ ul.innerHTML = ''; return; }
+  ul.innerHTML = notes.map(n=>`<li>${esc(n)}</li>`).join('');
+}
+
+function renderBackups(){
+  const bs = S.backups || [];
+  if(!bs.length){ $('#backups').innerHTML = '<div class="empty">还没有备份。</div>'; return; }
+  const rows = bs.map((b,i)=>`
+    <tr><td class="mono">${esc(b.name)}</td><td>${esc(b.created_text)}</td>
+      <td>${esc(b.trigger)}</td><td class="mono">${esc(b.bg||'—')} / ${esc(b.fg||'—')}</td>
+      <td>${b.has_editor?'✓':'—'}</td>
+      <td>${i===0?'<span class="badge">原始</span>':''}
+        <button class="ghost" data-bk="${esc(b.name)}">还原到这里</button></td></tr>`).join('');
+  $('#backups').innerHTML = `<table><thead><tr><th>时间戳</th><th>创建时间</th><th>触发</th>
+    <th>当时 背景/前景</th><th>含编辑器文件</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+  document.querySelectorAll('[data-bk]').forEach(btn=>{
+    btn.onclick = ()=>restoreFrom(btn.dataset.bk);
+  });
+}
+
+function renderStatus(){
+  const st = S.state;
+  const b = $('#curBadge');
+  if(S.state.preset){
+    const p = S.presets.find(x=>x.id===S.state.preset);
+    b.textContent = `当前选择：${p?p.name:S.state.preset}${st.updated_text?' · '+st.updated_text:''}`;
+  } else if(st.restored_from){
+    b.textContent = `已还原到 ${st.restored_from}`;
+  } else {
+    b.textContent = '还没应用过（本机为原始配色）';
+  }
+  const d = S.drift || {};
+  const box = $('#driftBox');
+  if(d.changed && d.changed.length){
+    box.innerHTML = `<div class="warn">检测到 ${d.changed.length} 项被外部改掉（GNOME 更新或手动设置）：
+      ${d.changed.slice(0,6).map(c=>`<code>${esc(c.app)}.${esc(c.key)}</code> 期望 <code>${esc(c.expected)}</code>
+      实际 <code>${esc(c.now)}</code>`).join('；')}${d.changed.length>6?' …':''}
+      <br>重新点一次「应用」即可覆盖回来。</div>`;
+  } else { box.innerHTML = ''; }
+}
+
+async function apply(){
+  const ov = collectOverrides();
+  $('#applyBtn').disabled = true;
+  $('#applyBtn').textContent = '应用中…';
+  try{
+    const r = await post('/api/apply', {preset: sel, overrides: ov});
+    S = r;
+    if(r.error){ toast(r.error, true); }
+    else if(r.result){
+      renderReport(r.result);
+      renderNotes(r.result);
+      const bad = r.result.items.filter(i=>!i.ok);
+      toast(bad.length ? `部分生效：${r.result.ok_count}/${r.result.total} 项回读一致`
+                       : `已应用 ${r.result.preset.name}，全部 ${r.result.total} 项回读一致`,
+            bad.length>0);
+    }
+    renderAll();
+  }catch(e){ toast('请求失败：'+e, true); }
+  finally{ $('#applyBtn').disabled = false; $('#applyBtn').textContent = '应用这个预设'; }
+}
+
+async function restoreFrom(name){
+  if(!confirm(name ? `按备份 ${name} 还原？` : '还原到本机原始配置？')) return;
+  $('#restoreBtn').disabled = true;
+  try{
+    const r = await post('/api/restore', name ? {backup:name} : {});
+    S = r;
+    if(r.error){ toast(r.error, true); }
+    else if(r.result){
+      renderReport(r.result, true);
+      toast(r.result.ok ? `已还原（${r.result.ok_count}/${r.result.total} 项）`
+                        : `还原完成但有 ${r.result.total-r.result.ok_count} 项失败，见清单`, !r.result.ok);
+    }
+    renderAll();
+  }catch(e){ toast('请求失败：'+e, true); }
+  finally{ $('#restoreBtn').disabled = false; }
+}
+
+function renderAll(){
+  sel = sel || S.presets[0].id;
+  renderPresets();
+  renderCurrent();
+  renderReport((S.last_restore && !S.last_apply) ? S.last_restore : S.last_apply);
+  renderBackups();
+  renderStatus();
+  if(!tweaked) syncTweakInputs();
+}
+
+// 微调控件
+['ovMono','ovUi','ovLh'].forEach(id=>{
+  $('#'+id).addEventListener('input', ()=>{
+    $('#monoVal').textContent = $('#ovMono').value;
+    $('#uiVal').textContent = $('#ovUi').value;
+    $('#lhVal').textContent = Number($('#ovLh').value).toFixed(2);
+    tweaked = true;
+  });
+});
+['ovBg','ovFg'].forEach(id=>{ $('#'+id).addEventListener('input', ()=>tweaked=true); });
+$('#resetTweak').onclick = ()=>{ syncTweakInputs(); toast('微调已归零，回到预设原值'); };
+$('#applyBtn').onclick = ()=>{ if(!sel) return toast('先选一个预设', true); apply(); };
+$('#restoreBtn').onclick = ()=>restoreFrom(null);
+
+(async function init(){
+  try{
+    S = await getState();
+    sel = S.state.preset || (S.presets[0] && S.presets[0].id);
+    renderAll();
+    if(!S.capabilities.editor_settings){
+      toast('没找到 Trae 的 settings.json，编辑器部分会跳过', true);
+    }
+  }catch(e){
+    document.body.insertAdjacentHTML('afterbegin',
+      `<div class="warn" style="margin:16px 26px">读取状态失败：${esc(e)}</div>`);
+  }
+})();
+</script>
+</body>
+</html>
